@@ -10,7 +10,7 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
    * CSCI 3155: Lab 6
    * Ian Smith
    *
-   * Partner: <Your Partner's Name>
+   * Partner: Eric Minor
    * Collaborators: <Any Collaborators>
    */
 
@@ -36,12 +36,16 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
   /*** Exercises with Continuations ***/
 
   def foldLeftAndThen[A,B](t: Tree)(z: A)(f: (A,Int) => A)(sc: A => B): B = {
-    def loop(acc: A, t: Tree)(sc: A => B): B = ???
+    def loop(acc: A, t: Tree)(sc: A => B): B = t match {
+      case Empty => sc(acc) // call function on this last element
+      case Node(l, d, r) => loop(acc,l)((acc) => loop(f(acc,d),r)(sc))  // loop left then eval current then loop right)))
+    }
     loop(z, t)(sc)
   }
 
   def dfs[A](t: Tree)(f: Int => Boolean)(sc: List[Int] => A)(fc: () => A): A = {
     def loop(path: List[Int], t: Tree)(fc: () => A): A = ???
+
     loop(Nil, t)(fc)
   }
 
