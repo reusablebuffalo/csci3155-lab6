@@ -13,9 +13,9 @@ import jsy.lab6._
 import jsy.student.Lab6._
 
 // Experiment with the warm-up exercises
-val l1 = List(1, 2, 3, 4, 5, 6)
+val l1 = List(0,0,-1)
 val t1 = treeFromList(l1)
-val r1 = foldLeftAndThen(t1)(Nil: List[Int]) { (acc, h) => h :: acc } { acc => acc }
+val r1 = foldLeftAndThen(t1)(Nil : List[Int]) { (acc, h) => h :: acc } { acc => acc }
 val p1 = dfs(t1) { i => i == 3 } { path => path } { () => Nil }
 val l2 = List(3, 4, 2, 1, 6, 5)
 val t2 = treeFromList(l2)

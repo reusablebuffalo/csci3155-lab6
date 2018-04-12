@@ -38,14 +38,17 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
   def foldLeftAndThen[A,B](t: Tree)(z: A)(f: (A,Int) => A)(sc: A => B): B = {
     def loop(acc: A, t: Tree)(sc: A => B): B = t match {
       case Empty => sc(acc) // call function on this last element
-      case Node(l, d, r) => loop(acc,l)((acc) => loop(f(acc,d),r)(sc))  // loop left then eval current then loop right)))
+      case Node(l, d, r) => loop(acc,l)((acc) => loop(f(acc,d),r)(sc))  // loop left then eval current then loop right
     }
     loop(z, t)(sc)
   }
 
   def dfs[A](t: Tree)(f: Int => Boolean)(sc: List[Int] => A)(fc: () => A): A = {
-    def loop(path: List[Int], t: Tree)(fc: () => A): A = ???
-
+    def loop(path: List[Int], t: Tree)(fc: () => A): A = t match {
+      case Empty => fc() // if we reach empty node, we failed (call fail continuation
+      case Node(l,d,r) => if (f(d)) sc(d :: path) // if true, then success continuation pass back the path
+          else loop(d :: path, l)(() => loop(d :: path, r)(fc)) // other not found, look left then look right (pass fc through)
+    }
     loop(Nil, t)(fc)
   }
 
