@@ -47,7 +47,7 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
     def loop(path: List[Int], t: Tree)(fc: () => A): A = t match {
       case Empty => fc() // if we reach empty node, we failed (call fail continuation
       case Node(l,d,r) => if (f(d)) sc(d :: path) // if true, then success continuation pass back the path
-          else loop(d :: path, l)(() => loop(d :: path, r)(fc)) // other not found, look left then look right (pass fc through)
+          else loop(d :: path, l)(() => loop(d :: path, r)(fc))
     }
     loop(Nil, t)(fc)
   }
@@ -135,9 +135,9 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
     */
   def test(re: RegExpr, chars: List[Char])(sc: List[Char] => Boolean): Boolean = (re, chars) match {
     /* Basic Operators */
-    case (RNoString, _) => ???
-    case (REmptyString, _) => ???
-    case (RSingle(_), Nil) => ???
+    case (RNoString, _) => false  // always false
+    case (REmptyString, _) => sc(chars) // check if empty
+    case (RSingle(_), Nil) => false // it needs to match on a character (empty list can't do this)
     case (RSingle(c1), c2 :: t) => ???
     case (RConcat(re1, re2), _) => ???
     case (RUnion(re1, re2), _) => ???
@@ -154,7 +154,7 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
     case (RNeg(re1), _) => ???
   }
 
-  def retest(re: RegExpr, s: String): Boolean = test(re, s.toList) { chars => ??? }
+  def retest(re: RegExpr, s: String): Boolean = test(re, s.toList) { chars => chars.isEmpty }
 
 
   /*******************************/

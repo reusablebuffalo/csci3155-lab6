@@ -85,7 +85,11 @@ class Lab6Spec(lab6: Lab6Like) extends FlatSpec {
     }
   }
 
-
+  " Empty String, ''," should "return true when matched against '#'" in {
+    assertResult(true){
+      retest(REmptyString, "")
+    }
+  }
   /*** Regular Expressions ***/
 
   val strings = List(
