@@ -138,14 +138,15 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
     case (RNoString, _) => false  // always false
     case (REmptyString, _) => sc(chars) // check if empty
     case (RSingle(_), Nil) => false // it needs to match on a character (empty list can't do this)
-    case (RSingle(c1), c2 :: t) => ???
-    case (RConcat(re1, re2), _) => ???
-    case (RUnion(re1, re2), _) => ???
-    case (RStar(re1), _) => ???
+    case (RSingle(c1), c2 :: t) => if(c1 != c2) false else sc(t)
+    case (RConcat(re1, re2), _) => test(re1, chars)(chars => test(re2, chars)(sc)) // test on first prefix then take remaining chars and test with second regex
+    case (RUnion(re1, re2), _) => test(re1, chars)(sc) || test(re2, chars)(sc)
+    // RStar(re1), chars must be in 0 or concatenations of re1; check empty first, then check for 0 or more
+    case (RStar(re1), _) => test(REmptyString, chars)(sc) || test(re1, chars)(sc)// still need 1 or more concatenations check
 
     /* Extended Operators */
-    case (RAnyChar, Nil) => false
-    case (RAnyChar, _ :: t) => ???
+    case (RAnyChar, Nil) => false // doesn't match on empty string
+    case (RAnyChar, _ :: t) => sc(t) // make sure that that t is empty
     case (RPlus(re1), _) => ???
     case (ROption(re1), _) => ???
 

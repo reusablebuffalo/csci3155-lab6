@@ -97,7 +97,8 @@ class Lab6Spec(lab6: Lab6Like) extends FlatSpec {
      "a",
      "aa",
      "ab",
-     "aaa"
+     "aaa",
+      "aaaa" // added test
   )
 
   val respecs = List(
