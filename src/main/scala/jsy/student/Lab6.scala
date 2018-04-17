@@ -108,7 +108,11 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
       case _ => Failure("expected intersect", next)
     }
 
-    def intersect(next: Input): ParseResult[RegExpr] = ???
+    def intersect(next: Input): ParseResult[RegExpr] = ??? //concat(next) match {
+//      case Success(r, next) => {
+//        def intersects(acc: RegExpr, next: Input) :ParseResult[RegExpr] = ???
+//      }
+//    }
 
     def concat(next: Input): ParseResult[RegExpr] = ???
 
@@ -142,13 +146,13 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
     case (RConcat(re1, re2), _) => test(re1, chars)(chars => test(re2, chars)(sc)) // test on first prefix then take remaining chars and test with second regex
     case (RUnion(re1, re2), _) => test(re1, chars)(sc) || test(re2, chars)(sc)
     // RStar(re1), chars must be in 0 or concatenations of re1; check empty first, then check for 1 then check for 2 or more
-    case (RStar(re1), _) => test(REmptyString, chars)(sc) || test(re1, chars)(sc) || test(re1, chars)(chars => test(RStar(re1),chars)(sc))
+    case (RStar(re1), _) => test(REmptyString, chars)(sc) || test(re1, chars)(new_chars => if(new_chars != chars) test(RStar(re1),new_chars)(sc) else false) // new_chars should be smaller (prevent infinite loop)
 
     /* Extended Operators */
     case (RAnyChar, Nil) => false // doesn't match on empty string
     case (RAnyChar, _ :: t) => sc(t) // make sure that that t is empty
-    case (RPlus(re1), _) => ???
-    case (ROption(re1), _) => ???
+    case (RPlus(re1), _) => test(RConcat(re1,RStar(re1)), chars)(sc) // has to be at least once, then 0 or more times
+    case (ROption(re1), _) => test(REmptyString, chars)(sc) || test(re1, chars)(sc) // either empty or once
 
     /***** Extra Credit Cases *****/
     case (RIntersect(re1, re2), _) => ???
