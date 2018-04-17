@@ -98,7 +98,10 @@ class Lab6Spec(lab6: Lab6Like) extends FlatSpec {
      "aa",
      "ab",
      "aaa",
-      "aaaa" // added test
+     "aaaa", // added test
+     "aaaaa",
+     "aaaaaa",
+     "aaaaaaaa"
   )
 
   val respecs = List(
@@ -106,7 +109,8 @@ class Lab6Spec(lab6: Lab6Like) extends FlatSpec {
     "b",
     ".",
     "aa",
-    "(aa)*"
+    "(aa)*",
+    "a|a"
   )
   
   val respecsast = respecs map { s => RegExprParser.parse(s) }
