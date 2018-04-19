@@ -92,6 +92,8 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
      * case class Failure(next: Input) extends ParseResult[Nothing]
      */
 
+    // I used http://cs.txstate.edu/~ch04/webtest/teaching/courses/5318/lectures/slides2/s4-amb-assoc-prec.pdf resource
+    // to help write my grammar
     def re(next: Input): ParseResult[RegExpr] = union(next)
 
     def union(next: Input): ParseResult[RegExpr] = intersect(next) match {
