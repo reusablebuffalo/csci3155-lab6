@@ -140,6 +140,12 @@ class Lab6Spec(lab6: Lab6Like) extends FlatSpec {
       }
     }
   }
+
+  // custom test for neg
+  "~ab*" should "be parsed correctly" in {
+    assertResult(RegExprParser.parse("~ab*")) {REParser.parse("~ab*")}
+    assertResult(RConcat(RNeg(RSingle('a')),RStar(RSingle('b')))) {REParser.parse("~ab*")}
+  }
   
 }
 

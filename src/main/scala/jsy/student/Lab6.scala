@@ -4,6 +4,8 @@ import jsy.lab6.Lab6Like
 import jsy.lab6.ast._
 import jsy.util.DoWith
 
+import scala.util.parsing.combinator.Parsers
+
 object Lab6 extends jsy.util.JsyApplication with Lab6Like {
 
   /*
@@ -101,30 +103,92 @@ object Lab6 extends jsy.util.JsyApplication with Lab6Like {
               case Success(r, next) => unions(RUnion(acc, r), next)
               case _ => Failure("expected intersect", next)
             }
-            case _ => Success(acc, next)
+            case _ => Success(acc, next) // pass along current regex
           }
         unions(r, next)
       }
       case _ => Failure("expected intersect", next)
     }
 
-    def intersect(next: Input): ParseResult[RegExpr] = ??? //concat(next) match {
-//      case Success(r, next) => {
-//        def intersects(acc: RegExpr, next: Input) :ParseResult[RegExpr] = ???
-//      }
-//    }
+    def intersect(next: Input): ParseResult[RegExpr] = concat(next) match {
+      case Success(r, next) => {
+        def intersects(acc: RegExpr, next: Input) : ParseResult[RegExpr] =
+          if(next.atEnd) Success(acc, next)
+          else (next.first, next.rest) match {
+            case ('&', next) => concat(next) match {
+              case Success(r, next) => intersects(RIntersect(acc, r), next)
+              case _ => Failure("expected concat", next)
+            }
+            case _ => Success(acc, next) // pass along current regex
+          }
+        intersects(r, next)
+      }
+      case _ => Failure("expected concat", next)
+    }
 
-    def concat(next: Input): ParseResult[RegExpr] = ???
+    def concat(next: Input): ParseResult[RegExpr] = not(next) match {
+      case Success(r, next) => {
+        def concats(acc: RegExpr, next: Input) : ParseResult[RegExpr] =
+          if(next.atEnd) Success(acc, next)
+          else not(next) match {
+              case Success(r, next) => concats(RConcat(acc, r), next)
+              case _ => Success(acc, next) // pass along current regex
+          }
+        concats(r, next)
+      }
+      case _ => Failure("expected not", next)
+    }
 
-    def not(next: Input): ParseResult[RegExpr] = ???
+    def not(next: Input): ParseResult[RegExpr] = {
+      def nots(next: Input): ParseResult[RegExpr] =
+        (next.first, next.rest) match {
+          case ('~', next) => not(next) match {
+            case Success(r, next) => Success(RNeg(r), next)
+            case _ => Failure("expected not", next)
+          }
+          case _ => star(next) match {
+            case Success(r, next) => Success(r, next) // pass along current regex
+            case _ => Failure("expected star", next)
+          }
+        }
+      nots(next)
+    }
 
-    def star(next: Input): ParseResult[RegExpr] = ???
+    def star(next: Input): ParseResult[RegExpr] = atom(next) match {
+      case Success(r, next) => {
+        def stars(acc : RegExpr, next : Input) : ParseResult[RegExpr] =
+          if (next.atEnd) Success(acc,next)
+          else (next.first, next.rest) match {
+            case ('*', next) => stars(RStar(acc), next)
+            case ('+', next) => stars(RPlus(acc), next)
+            case ('?', next) => stars(ROption(acc), next)
+            case _ => Success(acc, next) // pass along current regex
+          }
+        stars(r,next)
+      }
+      case _ => Failure("expected atom", next)
+    }
 
     /* This set is useful to check if a Char is/is not a regular expression
        meta-language character.  Use delimiters.contains(c) for a Char c. */
     val delimiters = Set('|', '&', '~', '*', '+', '?', '!', '#', '.', '(', ')')
 
-    def atom(next: Input): ParseResult[RegExpr] = ???
+    def atom(next: Input): ParseResult[RegExpr] =
+      if (next.atEnd) Failure("nothing to match against; expected atom", next)
+      else (next.first, next.rest) match {
+        case ('!',next) => Success(RNoString, next)
+        case ('#', next) => Success(REmptyString, next)
+        case ('.', next) => Success(RAnyChar, next)
+        case ('(', next) => re(next) match { // the inside of the parentheses should be a complete regular expression
+          case Success(r, next) => (next.first, next.rest) match { // entire inside of parens should be a complete regex
+            case (')', next) => Success(r, next) // we should now be at the closing paren
+            case _ => Failure("expected ')'", next) // otherwise fail
+          }
+          case _ => Failure("expected ')'", next)
+        }
+        case (c, next) => if (!delimiters.contains(c)) Success(RSingle(c),next) else Failure(c + " is a meta-language character", next)
+        case _ => Failure("expected atom", next)
+      }
   }
 
 
